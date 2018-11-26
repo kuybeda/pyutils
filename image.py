@@ -17,7 +17,7 @@ from numpy.fft import ifftn as fast_ifftn
 # from   skimage.measure import label #regionprops
 import os
 from   scipy import misc 
-from   utils import tprint
+# from   utils import tprint
 from   scipy.signal import medfilt
 import webcolors
 import cv2
@@ -144,15 +144,15 @@ def myframe2img(frame):
     return np.reshape(img,(frame.height, img.size/frame.height))[:,:frame.width]
 
 def video2dir(vidname,seqpath):
-    import av    
+    import av
     container = av.open(vidname)
-    video = next(s for s in container.streams if s.type == b'video')    
+    video = next(s for s in container.streams if s.type == b'video')
     for packet in container.demux(video):
-        for frame in packet.decode():        
+        for frame in packet.decode():
             imname = os.path.join(seqpath,'frame-%04d.png' % frame.index)
-            frame  = frame.reformat(format='gray16le')        
+            frame  = frame.reformat(format='gray16le')
             img    = np.frombuffer(frame.planes[0], np.dtype('<u2'))
-            im     = np.reshape(img,(frame.height, img.size/frame.height))[:,:frame.width]            
+            im     = np.reshape(img,(frame.height, img.size/frame.height))[:,:frame.width]
             #im  = myframe2img(frame)
             img = misc.toimage(im,high=im.max(), low=im.min(),mode='I')
             tprint('Saving %s' % (imname,))
@@ -583,14 +583,14 @@ def uncrop2D(im, sz):
     imu[..., unpadl[0]:unpadr[0], unpadl[1]:unpadr[1]] = im
     return imu
 
-def make_cubic(V):
+def make_cubic(V,size=0):
     ''' Uncrops volume to cubic shape of even size '''
+    # sz      = V.shape
+    # sz      = np.int32(sz)
+    # sz      = sz - np.mod(sz,2)
+    # V       = V[:sz[0],:sz[1],:sz[2]]
     sz      = V.shape
-    sz      = np.int32(sz)
-    sz      = sz - np.mod(sz,2)
-    V       = V[:sz[0],:sz[1],:sz[2]]
-    sz      = V.shape
-    mxsz    = max(sz)
+    mxsz    = max(sz + (size,))
     return uncrop3D(V,(mxsz,)*3)    
 
 def combine_fft(Vl,Vs):
@@ -695,8 +695,8 @@ def uncrop3D(im,sz):
     if imsz[0] == sz[0]:
         return im    
 #    print imsz[0],sz[0]
-    assert(np.mod(imsz[0],2)==0)
-    assert(np.mod(sz[0],2)==0)        
+#     assert(np.mod(imsz[0],2)==0)
+#     assert(np.mod(sz[0],2)==0)
     unpadl = (sz-imsz)//2 + np.mod(sz-imsz,2)
     unpadr = sz - (imsz + unpadl)
     imu    = np.zeros(im.shape[:-3]+tuple(sz),dtype=im.dtype)
