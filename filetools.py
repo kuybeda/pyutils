@@ -13,7 +13,7 @@ import errno
 import subprocess
 import glob
 # pip install scandir
-import scandir
+# import scandir
 
 def get_line(file,substr):
     with open(file, 'r') as f:
