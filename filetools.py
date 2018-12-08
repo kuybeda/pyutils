@@ -12,8 +12,23 @@ import shutil
 import errno
 import subprocess
 import glob
+import fnmatch
 # pip install scandir
 # import scandir
+
+def link_dirtree(srctree,dstdir,srcext='',dstext=''):
+  counter = 0
+  if os.path.exists(srctree):
+    for root, dir, files in os.walk(srctree):
+      for filename in fnmatch.filter(files, "*" + srcext):
+        srcfile = os.path.join(root, filename)
+        dstfile = os.path.join(dstdir, os.path.splitext(filename)[0] + dstext)
+        if not os.path.exists(dstfile):
+          print("Linking %s -> %s" % (srcfile, dstfile))
+          os.symlink(srcfile, dstfile)
+          counter += 1
+  print("%d files linked from %s" % (counter,srctree))
+  return counter
 
 def get_line(file,substr):
     with open(file, 'r') as f:
